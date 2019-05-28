@@ -4,7 +4,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 dataset = pd.read_csv("~/titanic/train.csv")
 
-
+import warnings
+warnings.filterwarnings('ignore')
 import seaborn
 
 seaborn.set()
@@ -142,18 +143,15 @@ from sklearn.metrics import classification_report
 print(classification_report(y_test,y_pred))
 
 from sklearn import metrics
-print.metrics.accuracy_score(y_test,y_pred)
+print(metrics.accuracy_score(y_test,y_pred))
 
 cnf_matrix = metrics.confusion_matrix(y_test, y_pred)
 print(cnf_matrix)
 
-fig, ax = plt.subplots()
-tick_marks = np.arange(len(class_names))
-plt.xticks(tick_marks, class_names)
-plt.yticks(tick_marks, class_names)
-sns.heatmap(pd.DataFrame(cnf_matrix), annot=True, cmap="viridis" ,fmt='g')
-ax.xaxis.set_label_position("top")
+ax = plt.subplots()
+seaborn.heatmap(pd.DataFrame(cnf_matrix), annot=True, cmap="viridis" ,fmt='g')
 plt.tight_layout()
 plt.title('Confusion matrix', y=1.1)
 plt.ylabel('Actual label')
 plt.xlabel('Predicted label')
+plt.show(10)
