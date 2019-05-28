@@ -90,3 +90,70 @@ X= pd.concat([X, Embarked], axis=1)
 X = X.drop(['Embarked_S'], axis=1)
 
 X.head()
+
+print(X.Age.isnull().value_counts())
+# -------- Change Name -> Title ----------------------------
+got= dataset.Name.str.split(',').str[1]
+X.iloc[:,1]=pd.DataFrame(got).Name.str.split('\s+').str[1]
+# ----------------------------------------------------------
+
+
+#------------------ Average Age per title -------------------------------------------------------------
+ax = plt.subplot()
+ax.set_ylabel('Average age')
+X.groupby('Name').mean()['Age'].plot(kind='bar',figsize=(13,8), ax = ax)
+
+title_mean_age=[]
+title_mean_age.append(list(set(X.Name)))  #set for unique values of the title, and transform into list
+title_mean_age.append(X.groupby('Name').Age.mean())
+title_mean_age
+#------------------------------------------------------------------------------------------------------
+
+
+#------------------ Fill the missing Ages ---------------------------
+n_traning= dataset.shape[0]   #number of rows
+n_titles= len(title_mean_age[1])
+for i in range(0, n_traning):
+    if np.isnan(X.Age[i])==True:
+        for j in range(0, n_titles):
+            if X.Name[i] == title_mean_age[0][j]:
+                X.Age[i] = title_mean_age[1][j]
+#--------------------------------------------------------------------
+
+X=X.drop(['Name'], axis=1)
+for i in range(0, n_traning):
+    if X.Age[i] > 18:
+        X.Age[i]= 0
+    else:
+        X.Age[i]= 1
+
+X.head()
+
+from sklearn.model_selection import train_test_split
+
+X_train, X_test, y_train, y_test = train_test_split(X,
+                                                    y, test_size=0.30,
+                                                    random_state=0)
+from sklearn.linear_model import LogisticRegression
+logmodel = LogisticRegression()
+logmodel.fit(X_train,y_train)
+y_pred= logmodel.predict(X_test)
+from sklearn.metrics import classification_report
+print(classification_report(y_test,y_pred))
+
+from sklearn import metrics
+print.metrics.accuracy_score(y_test,y_pred)
+
+cnf_matrix = metrics.confusion_matrix(y_test, y_pred)
+print(cnf_matrix)
+
+fig, ax = plt.subplots()
+tick_marks = np.arange(len(class_names))
+plt.xticks(tick_marks, class_names)
+plt.yticks(tick_marks, class_names)
+sns.heatmap(pd.DataFrame(cnf_matrix), annot=True, cmap="viridis" ,fmt='g')
+ax.xaxis.set_label_position("top")
+plt.tight_layout()
+plt.title('Confusion matrix', y=1.1)
+plt.ylabel('Actual label')
+plt.xlabel('Predicted label')
